@@ -128,7 +128,7 @@ public:
             // Compute cotangent of this angle
             // Add to edge weight 
 
-
+        
     }
 
     //---------------------------------   YOU DO NOT NEED TO CHANGE THE FOLLOWING CODE  --------------------------------//

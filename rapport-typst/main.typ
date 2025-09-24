@@ -36,7 +36,8 @@
 
 
 #pagebreak()
-= Exercice 1
+= Système linéaires
+== Exercice 1
 
 Système d'équations :
 
@@ -49,15 +50,25 @@ $ x_0 = 0.5 $
 $ x_1 = 0.5 $
 $ x_2 = -0.5 $
 
-= Exercice 2
+== Exercice 2
 
 $ A vec(x_0, x_1, x_2, delim: "[") = b $
 
-$ A = vec(x_0, x_1, x_2, delim: "[") $
+$ A = mat(1, 1, 0; 0, 1, 1; 1, 0, 1; delim: "[") $
 
 $ b = vec(1, 0, 0, delim: "[") $
 
+== Exercice 3
+
+J'obtiens bien la même solution qu'à la main.
+
 #pagebreak()
+
+= ARAP
+
+// Matrice taille (3 x nb sommets) x (2 x 3 x nb aretes)
+
+== Exercice 1
 
 
 

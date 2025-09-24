@@ -106,17 +106,15 @@ void testlinearSystem() {
     // You can get inspiration from this piece of code :
     {
         linearSystem mySystem;
-        mySystem.setDimensions(4 , 3);
+        mySystem.setDimensions(3 , 3);
 
-        mySystem.A(0,0) = 1.0;  mySystem.A(0,1) = 2.0;  mySystem.A(0,2) = 4.0;
-        mySystem.A(1,0) = 1.0;  mySystem.A(1,2) = 1.0;
-        mySystem.A(2,0) = -1.0;  mySystem.A(2,1) = 1.0;
-        mySystem.A(3,1) = -1.0;  mySystem.A(3,2) = 4.0;
+        mySystem.A(0,0) = 1.0;  mySystem.A(0,1) = 1.0;  mySystem.A(0,2) = 0.0;
+        mySystem.A(1,0) = 0.0;  mySystem.A(1,1) = 1.0;  mySystem.A(1,2) = 1.0;
+        mySystem.A(2,0) = 1.0;  mySystem.A(2,1) = 0.0;  mySystem.A(2,2) = 1.0;
         // the values that are not set with mySystem.A(row,column) = value, are set to 0 by default.
-        mySystem.b(0) = 5.0;
-        mySystem.b(1) = 6.0;
-        mySystem.b(2) = 2.0;
-        mySystem.b(3) = 4.0;
+        mySystem.b(0) = 1.0;
+        mySystem.b(1) = 0.0;
+        mySystem.b(2) = 0.0;
 
         mySystem.preprocess();
         Eigen::VectorXd X;
@@ -158,7 +156,6 @@ Eigen::MatrixXd getClosestRotation( Eigen::MatrixXd const & m ) {
 void updateSystem() {
     if(! handlesWereChanged) return;
 
-    // TODO:
     // set the right values for the number or rows and number of columns
     // remember: number of colums = nb of variables
     // remember: number of rows = nb of equations
@@ -169,18 +166,19 @@ void updateSystem() {
 
     for( unsigned int v = 0 ; v < mesh.V.size() ; ++v ) {
         unsigned int numberOfNeighbors = edgeAndVertexWeights.get_n_adjacent_edges(v);
-        nrows += 0;   // WHAT TO PUT HERE ??????? How to update the number of rows ?
+        nrows += 3 * numberOfNeighbors;
     }
     for( unsigned int v = 0 ; v < mesh.V.size() ; ++v ) {
         if(verticesHandles[v] != -1) {
-            nrows += 0;  // WHAT TO PUT HERE ??????? How to update the number of rows ?
+            nrows += 3;
         }
     }
+
+    ncolumns = 3 * mesh.V.size();
 
     // Once the number of rows and columns have been found, we can allocate the matrices:
     arapLinearSystem.setDimensions( nrows , ncolumns );
 
-    // TODO:
     // set the right values for the matrix A in the linear system
 
     unsigned int equationIndex = 0;
@@ -189,16 +187,28 @@ void updateSystem() {
              it != edgeAndVertexWeights.get_weight_of_adjacent_edges_it_end(v) ; ++it) {
 
             unsigned int vNeighbor = it->first;
-
+            
             // WHAT TO PUT HERE ??????? How to update the entries of A ?
+            arapLinearSystem.A(equationIndex + 0 , 3*v + 0) = 1.0f; // x coord of vertex v
+            arapLinearSystem.A(equationIndex + 1 , 3*v + 1) = 1.0f; // y coord of vertex v
+            arapLinearSystem.A(equationIndex + 2 , 3*v + 2) = 1.0f; // z coord of vertex v
 
+            arapLinearSystem.A(equationIndex + 0 , 3*vNeighbor + 0) = -1.0f; // x coord of vertex vNeighbor
+            arapLinearSystem.A(equationIndex + 1 , 3*vNeighbor + 1) = -1.0f; // y coord of vertex vNeighbor
+            arapLinearSystem.A(equationIndex + 2 , 3*vNeighbor + 2) = -1.0f; // z coord of vertex vNeighbor
+
+            equationIndex += 3;
         }
     }
     for( unsigned int v = 0 ; v < mesh.V.size() ; ++v ) {
         if(verticesHandles[v] != -1) {
 
             // WHAT TO PUT HERE ??????? How to update the entries of A ?
+            arapLinearSystem.A(equationIndex    , 3*v    ) = 1.0f; // x coord of vertex v
+            arapLinearSystem.A(equationIndex + 1, 3*v + 1) = 1.0f; // y coord of vertex v
+            arapLinearSystem.A(equationIndex + 2, 3*v + 2) = 1.0f; // z coord of vertex v
 
+            equationIndex += 3;
         }
     }
 
@@ -209,13 +219,13 @@ void updateSystem() {
 
 
 void updateMeshVertexPositionsFromARAPSolver() {
-    return; // TODO : COMMENT THIS LINE WHEN YOU START THE EXERCISE  (setup of the matrix A for the linear system A.X=B)
+    //return; // TODO : COMMENT THIS LINE WHEN YOU START THE EXERCISE  (setup of the matrix A for the linear system A.X=B)
     updateSystem();
 
     unsigned int maxIterationsForArap = 5;
 
 
-    return; // TODO : COMMENT THIS LINE WHEN YOU CONTINUE THE EXERCISE  (setup of the vector B for the linear system A.X=B)
+    //return; // TODO : COMMENT THIS LINE WHEN YOU CONTINUE THE EXERCISE  (setup of the vector B for the linear system A.X=B)
     // set the right values for the vector b in the linear system, solve the linear system and update the positions using the solution.
 
 
@@ -232,14 +242,22 @@ void updateMeshVertexPositionsFromARAPSolver() {
                 rotatedEdge = vertexRotationMatrices[v] * rotatedEdge;
 
                 // WHAT TO PUT HERE ??????? How to update the entries of b ?
+                arapLinearSystem.b(equationIndex + 0) = rotatedEdge[0]; // x coord of vertex v
+                arapLinearSystem.b(equationIndex + 1) = rotatedEdge[1]; // y coord of vertex v
+                arapLinearSystem.b(equationIndex + 2) = rotatedEdge[2]; // z coord of vertex v
 
+                equationIndex += 3;
             }
         }
         for( unsigned int v = 0 ; v < mesh.V.size() ; ++v ) {
             if(verticesHandles[v] != -1) {
 
                 // WHAT TO PUT HERE ??????? How to update the entries of b ?
+                arapLinearSystem.b(equationIndex) = mesh.V[v].p[0]; // x coord of vertex v
+                arapLinearSystem.b(equationIndex + 1) = mesh.V[v].p[1]; // y coord of vertex v
+                arapLinearSystem.b(equationIndex + 2) = mesh.V[v].p[2]; // z coord of vertex v
 
+                equationIndex += 3;
             }
         }
 
@@ -255,7 +273,7 @@ void updateMeshVertexPositionsFromARAPSolver() {
 
 
 
-        return; // TODO : COMMENT THIS LINE WHEN YOU CONTINUE THE EXERCISE (update of the rotation matrices -- auxiliary variables)
+        //return; // TODO : COMMENT THIS LINE WHEN YOU CONTINUE THE EXERCISE (update of the rotation matrices -- auxiliary variables)
 
 
 
@@ -273,7 +291,7 @@ void updateMeshVertexPositionsFromARAPSolver() {
                 }
 
                 // WHAT TO PUT HERE ??????? How to update the entries of the tensor matrix ?
-
+                tensorMatrix += /*it->second*/1.0 * (rotatedEdge * initialEdge.transpose());
             }
             vertexRotationMatrices[v] = getClosestRotation( tensorMatrix );
         }
