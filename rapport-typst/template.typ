@@ -95,7 +95,7 @@
   text("Template created by Gilles Gonzalez Oropeza", fill: white)
   v(1fr)
   align(center, text(1.5em,datetime.today().display()))
-  pagebreak()
+
   set cite(style: "alphanumeric")
   set page(numbering: "1")
   counter(page).update(1)
